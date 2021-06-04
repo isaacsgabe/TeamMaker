@@ -20,6 +20,10 @@ public class Team implements Comparable<Team>{
         this.players.add(p);
         this.talentLevel += p.getSkillLevel();
     }
+    public String getName(){
+        return this.name;
+    }
+
     public List<String> getRoster() {
         List<String> roster = new ArrayList<>();
         for (Player p : players) {
@@ -56,8 +60,12 @@ public class Team implements Comparable<Team>{
         if(o == null){
             throw new IllegalArgumentException();
         }
-        Double a = this.talentLevel;
-        Double b = o.talentLevel;
-        return b.compareTo(a);
+        if(this.talentLevel>o.talentLevel){
+            return 1;
+        }else if(o.talentLevel > this.talentLevel){
+            return -1;
+        }else{
+            return 0;
+        }
     }
 }

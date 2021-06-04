@@ -6,7 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 
-public class guiSheet{
+public class GuiSheet{
     private  JFrame frame;
     private JPanel panel;
     private JTextField userText;
@@ -17,7 +17,7 @@ public class guiSheet{
     private boolean allow;
     private boolean postions;
 
-    public guiSheet(){
+    public GuiSheet(){
         this.createFirstFrame();
         this.addButtonToFrameOneAndOpenFrameTwo();
         this.createSecondFrame();
