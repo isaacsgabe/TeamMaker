@@ -18,7 +18,6 @@ public class TeamMaker {
             Thread.sleep(1000);
         }
         TeamMakerMachine teamMaker = new TeamMakerMachine(userInterface);
-        teamMaker.printTeamsWithoutPostions();
-        System.out.println("work");
+        teamMaker.printTeamsWithoutPositions();
     }
 }

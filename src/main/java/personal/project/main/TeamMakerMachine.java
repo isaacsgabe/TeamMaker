@@ -10,6 +10,7 @@ import ui.isaacs.gabe.GuiPractice.GuiSheet;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 
@@ -19,9 +20,13 @@ public class TeamMakerMachine {
     private final boolean hasPostions;
     private final int numberOfTeams;
     private final MinHeap<Team> teams;
-
+    private GuiSheet guiSheet;
     public TeamMakerMachine(GuiSheet guiSheet) throws IOException {
-        if(guiSheet.hasPostions()){
+        if (guiSheet ==null){
+            throw new IllegalArgumentException();
+        }
+        this.guiSheet= guiSheet;
+        if(this.guiSheet.hasPostions()){
             this.talentList = new HashMap<>();
             hasPostions = true;
         }else{
@@ -46,7 +51,7 @@ public class TeamMakerMachine {
             hasPostions = false;
         }
         createPlayers(file);
-        this.numberOfTeams = 13;
+        this.numberOfTeams = 4;
         for(int i = 1; i <= numberOfTeams; i++){
             teams.insert(new Team("team " + (i)));
         }
@@ -64,55 +69,96 @@ public class TeamMakerMachine {
         workbook.close();
     }
 
-    private void getPlayersAsMap(Iterator<Row> rows){
-        int rowIndex =1;
+    private void getPlayersAsMap(Iterator<Row> rows) throws IOException {
+        String exception = "";
+        int rowIndex = 0;
         label1: while (rows.hasNext()) {
+            rowIndex++;
             Row currentRow = rows.next();
             Iterator<Cell> cellsInRow = currentRow.iterator();
             int cellIndex = 1;
             Player p = new Player();
             while (cellsInRow.hasNext()) {
                 Cell cell = cellsInRow.next();
-                if(rowIndex == 1 && cell.getStringCellValue().startsWith("position")){
-                    rowIndex++;
-                    continue label1;
+                try {
+                    if (rowIndex == 1 && cell.getStringCellValue().startsWith("position")) {
+                        continue label1;
+                    }
+                }catch (IllegalStateException e){
+                    exception ="there is a number in "  + (char)(cell.getColumnIndex()+65) + (cell.getRowIndex()+1);
+                    createFile(exception);
+                    System.exit(0);
                 }
-                if (cellIndex == 1) {
-                    p.setPosition(cell.getStringCellValue().toLowerCase());
-                } else if(cellIndex == 2) {
-                    p.setName(cell.getStringCellValue());
-                } else{
-                    p.setSkillLevel(cell.getNumericCellValue());
+                try {
+                    if (cellIndex == 1) {
+                        p.setPosition(cell.getStringCellValue().toLowerCase());
+                    } else if (cellIndex == 2) {
+                        p.setName(cell.getStringCellValue());
+                    }
+                }catch (IllegalStateException e){
+                        exception = "there is a number in "  + (char)(cell.getColumnIndex()+65) + rowIndex;
+                        createFile(exception);
+                        System.exit(0);
+                    }
+                try{
+                    if(cellIndex != 1 && cellIndex !=2) {
+                        p.setSkillLevel(cell.getNumericCellValue());
+                    }
+                }catch (IllegalStateException e){
+                    exception = "there is a character in "  + (char)(cell.getColumnIndex()+65) + rowIndex;
+                    createFile(exception);
+                    System.exit(0);
                 }
-                cellIndex++;
+                    cellIndex++;
+                    if (talentList.get(p.getPosition()) == null) {
+                        List<Player> talentLevel = new ArrayList<>();
+                        talentLevel.add(p);
+                        talentList.put(p.getPosition(), talentLevel);
+                    } else {
+                        talentList.get(p.getPosition()).add(p);
+                    }
             }
-            if (talentList.get(p.getPosition()) == null) {
-                List<Player> talentLevel = new ArrayList<>();
-                talentLevel.add(p);
-                talentList.put(p.getPosition(),talentLevel);
-            }else{
-                talentList.get(p.getPosition()).add(p);
-            }
+
         }
     }
 
     private void getPlayersAsList(Iterator<Row> rows) throws IOException {
-        int rowIndex =1;
+        String exception = "";
+        int rowIndex = 0;
         label1: while (rows.hasNext()) {
+            rowIndex++;
             Row currentRow = rows.next();
             Iterator<Cell> cellsInRow = currentRow.iterator();
             int cellIndex = 1;
             Player p = new Player();
             while (cellsInRow.hasNext()) {
                 Cell cell = cellsInRow.next();
-                if(rowIndex == 1 && cellIndex ==1 && cell.getStringCellValue().startsWith("name")){
-                    rowIndex++;
-                    continue label1;
+                try {
+                    if (rowIndex == 1 && cell.getStringCellValue().startsWith("name")) {
+                        continue label1;
+                    }
+                }catch (IllegalStateException e){
+                    exception ="there is a number in "  + (char)(cell.getColumnIndex()+65) + (cell.getRowIndex()+1);
+                    createFile(exception);
+                    System.exit(0);
                 }
-                if(cellIndex == 1) {
-                    p.setName(cell.getStringCellValue());
-                } else{
-                    p.setSkillLevel(cell.getNumericCellValue());
+                try{
+                    if(cellIndex == 1) {
+                        p.setName(cell.getStringCellValue());
+                    }
+                }catch (IllegalStateException e){
+                    exception ="there is a number in "  + (char)(cell.getColumnIndex()+65) + (cell.getRowIndex());
+                    createFile(exception);
+                    System.exit(0);
+                }
+                try{
+                    if(cellIndex != 1){
+                        p.setSkillLevel(cell.getNumericCellValue());
+                    }
+                }catch (IllegalStateException e){
+                    exception = "there is a character in "  + (char)(cell.getColumnIndex()+65) + rowIndex;
+                    createFile(exception);
+                    System.exit(0);
                 }
                 cellIndex++;
             }
@@ -120,7 +166,7 @@ public class TeamMakerMachine {
         }
     }
 
-    public void printTeamsWithoutPostions() {
+    public void printTeamsWithoutPositions() throws IOException {
         int counter = 0;
         Collections.sort(players);
         while(counter != players.size()){
@@ -131,14 +177,9 @@ public class TeamMakerMachine {
                 counter++;
             }
         }
-        while(!teams.isEmpty()){
-            Team t = this.teams.remove();
-            System.out.println(t.getUserFriendlyTeams());
-            System.out.println(t.getTalentLevel());
-            System.out.println();
-        }
+        createFile(getTeamsPrinted());
     }
-     public void printTeamsWithPosition(){
+     public void printTeamsWithPosition() throws IOException {
         Set<String> positions = this.talentList.keySet();
         for(String s: positions){
             List<Player> positionPlayers = this.talentList.get(s);
@@ -161,13 +202,31 @@ public class TeamMakerMachine {
                 this.teams.reHeapify(team);
             }
         }
+        createFile(getTeamsPrinted());
+     }
+
+     private void createFile(String string) throws IOException {
+         String currentDirectory = System.getProperty("user.dir");
+         File dir = new File(currentDirectory + File.separator + "TeamFolder");
+         dir.mkdir();
+         String pathWithFile = dir + File.separator + "teams.txt";
+         File info = new File(pathWithFile);
+         if(info.exists()){
+             info.delete();
+         }
+         FileWriter fileWriter = new FileWriter(info);
+         fileWriter.write(string);
+         fileWriter.close();
+     }
+
+     private String getTeamsPrinted() throws IOException {
+        String string = "";
          while(!teams.isEmpty()){
              Team t = this.teams.remove();
-             System.out.println(t.getUserFriendlyTeams());
-             System.out.println(t.getTalentLevel());
-             System.out.println();
+             string += t.getUserFriendlyTeams();
+             string += "\n " + t.getTalentLevel() + "\n";
          }
-
-
+         createFile(string);
+         return string;
      }
 }
