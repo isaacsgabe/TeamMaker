@@ -1,8 +1,5 @@
 package personal.project.objects;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 public class Team implements Comparable<Team>{
     private String name;
@@ -10,15 +7,26 @@ public class Team implements Comparable<Team>{
     private boolean hasPositions;
     private Set<String> positions;
     private double talentLevel;
+    private double previousTalentLevel;
+    private HashMap<String,Integer> playersPerPosition;
 
     public Team(String name) {
         this.name=name;
         this.players=new HashSet<>();
         this.positions = new HashSet<>();
+        this.playersPerPosition = new HashMap<>();
     }
     public void addPlayer(Player p) {
         this.players.add(p);
         this.talentLevel += p.getSkillLevel();
+        if(hasPositions){
+            Integer amount = this.playersPerPosition.get(p.getPosition());
+            if(amount == null){
+                this.playersPerPosition.put(p.getPosition(),1);
+            }else{
+                playersPerPosition.put(p.getPosition(),amount +1);
+            }
+        }
     }
     public String getName(){
         return this.name;
@@ -43,16 +51,17 @@ public class Team implements Comparable<Team>{
         return teams;
     }
 
-    public boolean isHasPositions() {
-        return hasPositions;
-    }
-
     public void setHasPositions(boolean hasPositions) {
         this.hasPositions = hasPositions;
     }
 
     public double getTalentLevel() {
         return talentLevel;
+    }
+
+    public void setTalentLevel(Double d) {
+        this.previousTalentLevel = this.talentLevel;
+         this.talentLevel = d;
     }
 
     @Override
@@ -67,5 +76,16 @@ public class Team implements Comparable<Team>{
         }else{
             return 0;
         }
+    }
+
+    public double getPreviousTalentLevel() {
+        return previousTalentLevel;
+    }
+
+    public int playersPerPosition(String s){
+        if(this.playersPerPosition.get(s) == null){
+            return 0;
+        }
+        return this.playersPerPosition.get(s);
     }
 }

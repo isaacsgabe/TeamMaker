@@ -16,9 +16,9 @@ import java.util.*;
 public class TeamMakerMachine {
     private HashMap<String, List<Player>> talentList;
     private List<Player> players;
-    private boolean hasPostions;
-    private int numberOfTeams;
-    private MinHeap<Team> teams;
+    private final boolean hasPostions;
+    private final int numberOfTeams;
+    private final MinHeap<Team> teams;
 
     public TeamMakerMachine(GuiSheet guiSheet) throws IOException {
         if(guiSheet.hasPostions()){
@@ -31,6 +31,9 @@ public class TeamMakerMachine {
         createPlayers(guiSheet.getFile());
         this.numberOfTeams = guiSheet.getNumber();
         this.teams = new MinHeapImpl<>();
+        for(int i = 1; i < numberOfTeams+1; i++){
+            teams.insert(new Team("team " + (i)));
+        }
     }
 
     public TeamMakerMachine(File file,boolean b) throws IOException {
@@ -43,7 +46,10 @@ public class TeamMakerMachine {
             hasPostions = false;
         }
         createPlayers(file);
-        this.numberOfTeams = 4;
+        this.numberOfTeams = 13;
+        for(int i = 1; i <= numberOfTeams; i++){
+            teams.insert(new Team("team " + (i)));
+        }
     }
 
     public void createPlayers(File file) throws IOException {
@@ -115,9 +121,6 @@ public class TeamMakerMachine {
     }
 
     public void printTeamsWithoutPostions() {
-        for(int i = 1; i < numberOfTeams+1; i++){
-            teams.insert(new Team("team " + (i)));
-        }
         int counter = 0;
         Collections.sort(players);
         while(counter != players.size()){
@@ -133,7 +136,38 @@ public class TeamMakerMachine {
             System.out.println(t.getUserFriendlyTeams());
             System.out.println(t.getTalentLevel());
             System.out.println();
-            System.out.println("work");
         }
     }
+     public void printTeamsWithPosition(){
+        Set<String> positions = this.talentList.keySet();
+        for(String s: positions){
+            List<Player> positionPlayers = this.talentList.get(s);
+            Collections.sort(positionPlayers);
+            Set<Team> oldTalentLevel = new HashSet<>();
+            while(!positionPlayers.isEmpty()){
+                Team team = this.teams.min();
+                double z =Math.ceil(positionPlayers.size()/(double)this.numberOfTeams);
+                while(team.playersPerPosition(s) >= z){
+                    team.setTalentLevel(Double.MAX_VALUE);
+                    this.teams.reHeapify(team);
+                    oldTalentLevel.add(team);
+                    team = this.teams.min();
+                }
+                team.addPlayer(positionPlayers.remove(0));
+                this.teams.reHeapify(team);
+            }
+            for(Team team: oldTalentLevel){
+                team.setTalentLevel(team.getPreviousTalentLevel());
+                this.teams.reHeapify(team);
+            }
+        }
+         while(!teams.isEmpty()){
+             Team t = this.teams.remove();
+             System.out.println(t.getUserFriendlyTeams());
+             System.out.println(t.getTalentLevel());
+             System.out.println();
+         }
+
+
+     }
 }

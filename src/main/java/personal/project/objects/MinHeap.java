@@ -87,5 +87,11 @@ public abstract class MinHeap<E extends Comparable<E>> {
         this.elements[this.count + 1] = null; //null it to prepare for GC
         return min;
     }
+
+    public E min(){
+        return this.elements[1];
+    }
+
+
 }
 

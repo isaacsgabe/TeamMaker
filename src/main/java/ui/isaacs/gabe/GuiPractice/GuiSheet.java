@@ -103,15 +103,31 @@ public class GuiSheet{
         frame3.setSize(500,300);
         frame3.add(panel3);
         panel3.setLayout(null);
-        JLabel label  = new JLabel("Get Excel File");
-        label.setBounds(10,25,300,30);
+        JLabel label;
+        JLabel label2;
+        JLabel label3;
+        if(postions) {
+            label  = new JLabel("Please enter the names in the first column (the word name can in the first cell)");
+            label2  = new JLabel(" and a talent level in each column after that (the column position can be in the first cell).");
+            label3 =  new JLabel("ex: strength, speed, agility");
+
+        }else{
+            label  = new JLabel("Please enter the position in the first column (the word \"name\" can in the first cell)");
+            label2  = new JLabel("name in the second columns and a talent level in each column after that");
+            label3 =  new JLabel( "(the column name can be in the first cell). ex: strength, speed, agility");
+        }
+        label.setBounds(10,25,500,30);
+        label2.setBounds(10,40,500,30);
+        label3.setBounds(10,55,500,30);
+        panel3.add(label3);
+        panel3.add(label2);
         panel3.add(label);
         frame.setVisible(true);
         JButton button3 = new JButton("get files");
-        button3.setBounds(200,33,100,20);
+        button3.setBounds(375,100,100,20);
         panel3.add(button3);
         JLabel notExcelFile = new JLabel();
-        notExcelFile.setBounds(100,57,300,30);
+        notExcelFile.setBounds(300,100,100,20);
         panel3.add(notExcelFile);
         button3.addActionListener(new ActionListener() {
             @Override
@@ -134,10 +150,10 @@ public class GuiSheet{
             }
         });
         JButton button4 = new JButton("Submit");
-        button4.setBounds(10,60,80,20);
+        button4.setBounds(10,100,80,20);
         panel3.add(button4);
         JLabel cantSubmit = new JLabel();
-        cantSubmit.setBounds(10,80,400,20);
+        cantSubmit.setBounds(10,120,400,20);
         panel3.add(cantSubmit);
         button4.addActionListener(new ActionListener() {
             @Override
